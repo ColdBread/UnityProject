@@ -23,6 +23,18 @@ public class LevelController : MonoBehaviour {
         current = this;
     }
 
+    public void addCoins(float num)
+    {
+        
+    }
+    public void addFruits(float num)
+    {
+        
+    }
+    public void addCrystals(float num)
+    {
+        
+    }
 
 	// Use this for initialization
 	void Start () {

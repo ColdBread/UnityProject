@@ -7,6 +7,7 @@ public class HeroRabbit : MonoBehaviour
 
     public float speed = 1;
     Rigidbody2D myBody = null;
+    Transform heroParent = null;
 
     bool isGrounded = false;
     bool JumpActive = false;
@@ -14,11 +15,14 @@ public class HeroRabbit : MonoBehaviour
     public float MaxJumpTime = 2f;
     public float JumpSpeed = 2f;
 
+    
+
     // Use this for initialization
     void Start()
     {
         myBody = this.GetComponent<Rigidbody2D>();
         LevelController.current.setStartPosition(transform.position);
+        this.heroParent = this.transform.parent;
     }
 
     // Update is called once per frame
@@ -27,11 +31,32 @@ public class HeroRabbit : MonoBehaviour
 
     }
 
+    static void SetNewParent(Transform obj, Transform new_parent)
+    {
+        if (obj.transform.parent != new_parent)
+        {
+            //Засікаємо позицію у Глобальних координатах
+            Vector3 pos = obj.transform.position;
+            //Встановлюємо нового батька
+            obj.transform.parent = new_parent;
+            //Після зміни батька координати кролика зміняться
+            //Оскільки вони тепер відносно іншого об’єкта
+            //повертаємо кролика в ті самі глобальні координати
+            obj.transform.position = pos;
+        }
+    }
+
     void FixedUpdate()
     {
         Run();
 
         Jump();
+    }
+
+    public void Die()
+    {
+        Animator animator = GetComponent<Animator>();
+        animator.SetBool("die", true);
     }
 
     private void Run()
@@ -64,7 +89,7 @@ public class HeroRabbit : MonoBehaviour
 
     private void Jump()
     {
-        Vector3 from = transform.position + Vector3.up * 0.3f;
+        Vector3 from = transform.position + Vector3.up * 0.6f;
         Vector3 to = transform.position + Vector3.down * 0.1f;
         int layer_id = 1 << LayerMask.NameToLayer("Ground");
         //Перевіряємо чи проходить лінія через Collider з шаром Ground
@@ -72,13 +97,26 @@ public class HeroRabbit : MonoBehaviour
         if (hit)
         {
             isGrounded = true;
+            //Перевіряємо чи ми опинились на платформі
+            if (hit.transform != null
+            && hit.transform.GetComponent<MovingPlatform>() != null)
+            {
+                //Приліпаємо до платформи
+                SetNewParent(this.transform, hit.transform);
+            }
         }
         else
         {
+            //Ми в повітрі відліпаємо під платформи
+            SetNewParent(this.transform, this.heroParent);
             isGrounded = false;
         }
         //Намалювати лінію (для розробника)
         Debug.DrawLine(from, to, Color.red);
+
+        
+        
+        
 
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
@@ -112,6 +150,27 @@ public class HeroRabbit : MonoBehaviour
         else
         {
             animator.SetBool("jump", true);
+        }
+    }
+
+    bool isBig;
+    public bool IsBig
+    {
+        get
+        {
+            return isBig;
+        }
+        set
+        {
+            if (value)
+            {
+                this.transform.localScale = new Vector3(2, 2, 2);
+            }
+            else
+            {
+                this.transform.localScale = new Vector3(1, 1, 1);
+            }
+            isBig = value;
         }
     }
 }
