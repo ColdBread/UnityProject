@@ -8,13 +8,16 @@ public class HeroRabbit : MonoBehaviour
     public float speed = 1;
     Rigidbody2D myBody = null;
     Transform heroParent = null;
+    Animator animator;
 
     bool isGrounded = false;
     bool JumpActive = false;
     float JumpTime = 0f;
     public float MaxJumpTime = 2f;
     public float JumpSpeed = 2f;
-
+    public float DyingTime = 1f;
+    float time_to_wait;
+    private bool isDying = false;
     
 
     // Use this for initialization
@@ -23,12 +26,21 @@ public class HeroRabbit : MonoBehaviour
         myBody = this.GetComponent<Rigidbody2D>();
         LevelController.current.setStartPosition(transform.position);
         this.heroParent = this.transform.parent;
+        time_to_wait = DyingTime;
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        if (isDying) {
+            time_to_wait -= Time.deltaTime;
+            if(time_to_wait <= 0) {
+                isDying = false;
+                animator.SetBool("die",false);
+                time_to_wait = DyingTime;
+                LevelController.current.onRabitDeath(this);
+            }
+        }
     }
 
     static void SetNewParent(Transform obj, Transform new_parent)
@@ -48,22 +60,25 @@ public class HeroRabbit : MonoBehaviour
 
     void FixedUpdate()
     {
+        if(!isDying){
         Run();
 
         Jump();
+        }
     }
 
     public void Die()
     {
-        Animator animator = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
         animator.SetBool("die", true);
+        this.isDying = true;
     }
 
     private void Run()
     {
         float value = Input.GetAxis("Horizontal");
 
-        Animator animator = GetComponent<Animator>();
+        animator = GetComponent<Animator>();
 
         if (Mathf.Abs(value) > 0)
         {
