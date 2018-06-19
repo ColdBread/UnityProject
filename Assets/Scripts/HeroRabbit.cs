@@ -9,6 +9,7 @@ public class HeroRabbit : MonoBehaviour
     Rigidbody2D myBody = null;
     Transform heroParent = null;
     Animator animator;
+    public static HeroRabbit lastRabit = null;
 
     bool isGrounded = false;
     bool JumpActive = false;
@@ -27,6 +28,10 @@ public class HeroRabbit : MonoBehaviour
         LevelController.current.setStartPosition(transform.position);
         this.heroParent = this.transform.parent;
         time_to_wait = DyingTime;
+    }
+
+    void Awake(){
+        lastRabit = this;
     }
 
     // Update is called once per frame
