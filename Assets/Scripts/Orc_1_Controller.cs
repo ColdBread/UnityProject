@@ -5,12 +5,16 @@ using UnityEngine;
 public class Orc_1_Controller : MonoBehaviour {
 
 	public float speed = 1;
+    public float death_time = 0.1f;
+    public float attack_time = 2f;
     Rigidbody2D myBody = null;
 	Animator animator;
 	public Vector3 MoveBy;
     Vector3 pointA;
     Vector3 pointB;
 	Mode mode = Mode.GoToA;
+    bool isDying = false;
+    bool attacking = false;
 	
 
 	// Use this for initialization
@@ -23,8 +27,17 @@ public class Orc_1_Controller : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		RunUpdate();
-		HitUpdate();
+        if (!isDying)
+        {
+            RunUpdate();
+            HitUpdate();
+        }
+        else
+        {
+            Vector2 vel = myBody.velocity;
+            vel.x = 0;
+            myBody.velocity = vel;
+        }
 	}
 
 	bool isArrived(Vector3 pos, Vector3 target)
@@ -39,19 +52,35 @@ public class Orc_1_Controller : MonoBehaviour {
 		Vector3 rabit_pos = HeroRabbit.lastRabit.transform.position;
 		my_pos.z = 0;
 		rabit_pos.z = 0;
-		if (Vector3.Distance(my_pos, rabit_pos) < 1f) {
-			if(Mathf.Abs(rabit_pos.y - my_pos.y) > 1.5f 
-				&& Mathf.Abs(rabit_pos.y - my_pos.y) < 2f){
-					this.Die();
-			} else {
+        if (Mathf.Abs(rabit_pos.x - my_pos.x) < 1f)
+        {
+			if(Mathf.Abs(rabit_pos.y - my_pos.y) > 1f ){
+                if (Mathf.Abs(rabit_pos.y - my_pos.y) < 1.7f)
+                {
+                    StartCoroutine(Die());
+                }
+			} else if(!attacking) {
+                
 				animator.SetTrigger("Attack");
+                StartCoroutine(reloadAttack());
 				HeroRabbit.lastRabit.Die();
 			}
 		}
 	}
 
-	void Die() {
-		
+    IEnumerator reloadAttack()
+    {
+        attacking = true;
+        yield return new WaitForSeconds(attack_time);
+        attacking = false;
+    }
+
+	IEnumerator Die() {
+        animator.SetBool("Die", true);
+        isDying = true;
+        yield return new WaitForSeconds(death_time);
+        animator.SetBool("Die", false);
+        Destroy(this.gameObject);
 	}
 
 	void RunUpdate(){
@@ -89,6 +118,11 @@ public class Orc_1_Controller : MonoBehaviour {
 				if(mode == Mode.Attack)
 					mode = Mode.GoToA;
 			}
+        if (attacking)
+        {
+            return 0;
+        }
+
 		if(mode == Mode.GoToA){
 			if(isArrived(my_pos,pointA)){
 				mode = Mode.GoToB;
@@ -108,7 +142,8 @@ public class Orc_1_Controller : MonoBehaviour {
 			} else {
 				return -1;
 			}
-		}
-		return 0;
+        }
+         
+        return 0;
 	}
 }
