@@ -79,6 +79,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hideAnimation: 0
+  color: 2
 --- !u!212 &212691940421735048
 SpriteRenderer:
   m_ObjectHideFlags: 1

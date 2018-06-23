@@ -74,7 +74,7 @@ public class Orc_2_Controller : MonoBehaviour {
 
     void AttackUpdate(){
         if(mode==Mode.Attack){
-            if(Time.time - last_carrot > 2.0f){
+            if(Time.time - last_carrot > 4.0f){
                 this.LaunchCarrot(WhereIsRabit());
             }
         }

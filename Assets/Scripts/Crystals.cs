@@ -4,12 +4,15 @@ using UnityEngine;
 
 public class Crystals : Collectable {
 
+	public Crystal color;
 
     protected override void OnRabitHit(HeroRabbit rabit)
     {
-        LevelController.current.addCrystals(1);
+        LevelController.current.addCrystals(this.color);
         this.CollectedHide();
     }
+
+	
 
 	// Use this for initialization
 	void Start () {

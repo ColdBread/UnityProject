@@ -100,8 +100,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hideAnimation: 0
-  life_time: 0
-  speed: 0
+  life_time: 3
+  speed: 1
 --- !u!212 &212073389632814494
 SpriteRenderer:
   m_ObjectHideFlags: 1
