@@ -6,7 +6,6 @@ public class Orc_2_Controller : MonoBehaviour {
 
     public float speed = 1;
     public float death_time = 0.1f;
-    public float attack_time = 2f;
     Rigidbody2D myBody = null;
     Animator animator;
     public Vector3 MoveBy;
@@ -14,8 +13,10 @@ public class Orc_2_Controller : MonoBehaviour {
     Vector3 pointB;
     Mode mode = Mode.GoToA;
     bool isDying = false;
-    bool attacking = false;
+    
     SpriteRenderer sr;
+    float last_carrot = 0;
+    public GameObject prefabCarrot;
 
 
     // Use this for initialization
@@ -35,6 +36,7 @@ public class Orc_2_Controller : MonoBehaviour {
         {
             RunUpdate();
             HitUpdate();
+            AttackUpdate();
         }
         else
         {
@@ -66,29 +68,50 @@ public class Orc_2_Controller : MonoBehaviour {
                     StartCoroutine(Die());
                 }
             }
-            else if (!attacking)
-            {
+            
+        }
+    }
 
-                animator.SetTrigger("Attack");
-                StartCoroutine(reloadAttack());
-                HeroRabbit.lastRabit.Die();
+    void AttackUpdate(){
+        if(mode==Mode.Attack){
+            if(Time.time - last_carrot > 2.0f){
+                this.LaunchCarrot(WhereIsRabit());
             }
         }
     }
 
-    IEnumerator reloadAttack()
-    {
-        attacking = true;
-        yield return new WaitForSeconds(attack_time);
-        attacking = false;
+    void LaunchCarrot(float direction){
+        animator.SetTrigger("attack");
+        last_carrot = Time.time;
+        GameObject obj = GameObject.Instantiate(this.prefabCarrot);
+        obj.transform.position = this.transform.position + new Vector3(0, 1, 0);;
+        Carrot carrot = obj.GetComponent<Carrot> ();
+        carrot.launch (direction);
     }
+    float WhereIsRabit(){
+        Vector3 my_pos = this.transform.position;
+        Vector3 rabit_pos = HeroRabbit.lastRabit.transform.position;
+        if (my_pos.x < rabit_pos.x)
+            {
+                sr.flipX = true;
+                return 1;
+            }
+            else
+            {
+                sr.flipX = false;
+                return -1;
+            }
+        
+    }
+
+    
 
     IEnumerator Die()
     {
-        animator.SetBool("Die", true);
+        animator.SetBool("die", true);
         isDying = true;
         yield return new WaitForSeconds(death_time);
-        animator.SetBool("Die", false);
+        animator.SetBool("die", false);
         Destroy(this.gameObject);
     }
 
@@ -101,11 +124,14 @@ public class Orc_2_Controller : MonoBehaviour {
             Vector2 vel = myBody.velocity;
             vel.x = value * speed;
             myBody.velocity = vel;
-            animator.SetBool("Run", true);
+            animator.SetBool("run", true);
         }
         else
         {
-            animator.SetBool("Run", false);
+            Vector2 vel = myBody.velocity;
+            vel.x = value * speed;
+            myBody.velocity = vel;
+            animator.SetBool("run", false);
         }
         
         if (value < 0)
@@ -125,16 +151,14 @@ public class Orc_2_Controller : MonoBehaviour {
         if (Mathf.Abs(rabit_pos.x - my_pos.x) < 5.0f)
         {
             mode = Mode.Attack;
+            
         }
         else
         {
             if (mode == Mode.Attack)
                 mode = Mode.GoToA;
         }
-        if (attacking)
-        {
-            return 0;
-        }
+        
 
         if (mode == Mode.GoToA)
         {
@@ -169,7 +193,7 @@ public class Orc_2_Controller : MonoBehaviour {
             else
             {
                 sr.flipX = false;
-                return -1;
+                return 0;
             }
         }
 
