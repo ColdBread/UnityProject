@@ -24,6 +24,7 @@ public class LevelController : MonoBehaviour {
     bool isRedFound;
     int fruit_num = 0;
     Vector3 startingPosition;
+    public GameObject settingsPrefab;
 
     public void onRabitDeath(HeroRabbit rabit)
     {
@@ -36,6 +37,10 @@ public class LevelController : MonoBehaviour {
         } else {
             SceneManager.LoadScene("ChooseLevelScene");
         }
+    }
+
+    void showSettings(){
+        
     }
 
     public void setStartPosition(Vector3 pos)
